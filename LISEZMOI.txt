@@ -1,0 +1,38 @@
+Evo — appli pour Eléa
+=====================
+
+1. METTRE EN LIGNE (comme D.star)
+   - Nouveau dépôt GitHub (ex. "evo"), dépose TOUS les fichiers de ce dossier.
+   - Settings > Pages > Branch : main / root > Save.
+   - Adresse : https://TON-PSEUDO.github.io/evo/
+   - Avant : change pinPapa dans messages.js et personnalise quelques messages.
+
+2. INSTALLER (sur TON téléphone ET sur le sien, tous deux Android)
+   - Ouvrir le lien dans Chrome > menu ⋮ > "Installer l'application"
+     (ou "Ajouter à l'écran d'accueil").
+   - Indispensable : c'est l'installation qui fait apparaître Evo
+     dans le menu "Partager" d'Android.
+
+3. RÉGLAGE UNIQUE SUR TON TÉLÉPHONE
+   - Dans Evo, tape 5 fois sur le E > code papa.
+   - Étape 1 : choisis un "code de famille" (6 caractères minimum)
+     et donne-le à Eléa de vive voix. Jamais par écrit sur GitHub.
+
+4. ENVOYER DES PHOTOS (à chaque fois)
+   - Mode papa > Étape 2 > Choisir des photos (20 max) > légendes > "Envoyer le colis".
+   - Le menu Partager s'ouvre > WhatsApp > Eléa.
+   - Elle reçoit UN fichier "colis-evo-....txt" chiffré.
+     Il n'apparaît pas dans sa galerie et il est illisible sans le code.
+
+5. CÔTÉ ELÉA (2 gestes)
+   - Dans WhatsApp, appui long sur le fichier > icône Partager > Evo.
+     (Autre méthode : dans Evo, bouton "📦 Ouvrir un colis de papa" en bas.)
+   - Au premier colis seulement, elle entre le code de famille. Ensuite, c'est automatique.
+   - Les photos rejoignent "Archive du jour", avec des confettis.
+   - Ouvrir deux fois le même colis ne crée pas de doublon.
+
+6. BON À SAVOIR
+   - Les photos sont stockées dans Evo, sur son téléphone uniquement.
+     Si elle désinstalle Evo, elles disparaissent : renvoie un colis.
+   - Modifier les messages : édite messages.js sur GitHub, puis dans sw.js
+     passe "evo-v2" à "evo-v3".

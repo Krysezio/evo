@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Evo</title>
+<meta name="theme-color" content="#070304">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Evo">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=VT323&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#070304; --red:#ff2a3a; --red-dim:#b3121f; --ink:#f3e9e4; --muted:#a7918b;
+    --card:rgba(30,8,10,.62); --line:rgba(255,42,58,.35);
+    --serif:"Libre Baskerville", Georgia, "Times New Roman", serif;
+    --mono:"VT323", ui-monospace, "Courier New", monospace;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--ink)}
+  body{font-family:var(--serif);overflow-x:hidden;
+    background:radial-gradient(120% 80% at 50% 0%, #2a0709 0%, #0b0405 55%, var(--bg) 100%) fixed;}
+  #dust{position:fixed;inset:0;pointer-events:none;z-index:0}
+  .scan{position:fixed;inset:0;pointer-events:none;z-index:50;
+    background:repeating-linear-gradient(to bottom, rgba(255,255,255,.025) 0 1px, transparent 1px 3px);
+    mix-blend-mode:overlay}
+  .vignette{position:fixed;inset:0;pointer-events:none;z-index:49;
+    background:radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,.75) 100%)}
+  main{position:relative;z-index:1;max-width:520px;margin:0 auto;
+    padding:calc(env(safe-area-inset-top) + 22px) 18px calc(env(safe-area-inset-bottom) + 40px)}
+
+  header{text-align:center;margin-bottom:18px}
+  .logo{width:92px;height:92px;display:block;margin:0 auto 6px;cursor:pointer;user-select:none;
+    animation:flicker 7s infinite}
+  @keyframes flicker{0%,100%{opacity:1}
+    41%{opacity:1}42%{opacity:.35}43%{opacity:1}45%{opacity:.6}46%{opacity:1}
+    78%{opacity:1}79%{opacity:.5}80%{opacity:1}}
+  h1{font-weight:700;font-size:30px;letter-spacing:.14em;margin:4px 0 2px;text-transform:uppercase;
+    color:transparent;-webkit-text-stroke:1.2px var(--red);
+    text-shadow:0 0 10px rgba(255,42,58,.55),0 0 28px rgba(255,42,58,.35)}
+  .date{font-family:var(--mono);font-size:20px;color:var(--muted);letter-spacing:.08em}
+  .countdown{display:inline-block;margin-top:10px;font-family:var(--mono);font-size:21px;
+    color:var(--red);border:1px solid var(--line);padding:3px 12px;border-radius:3px;
+    text-shadow:0 0 8px rgba(255,42,58,.6)}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:20px 18px;
+    margin:16px 0;box-shadow:0 0 0 1px rgba(0,0,0,.4) inset, 0 10px 30px rgba(0,0,0,.45);
+    backdrop-filter:blur(3px)}
+  .label{font-family:var(--mono);font-size:18px;letter-spacing:.18em;color:var(--red);
+    text-transform:uppercase;margin:0 0 10px;text-shadow:0 0 6px rgba(255,42,58,.5)}
+
+  .surprise{text-align:center;border-color:var(--red);
+    box-shadow:0 0 24px rgba(255,42,58,.35), 0 0 0 1px rgba(255,42,58,.4) inset}
+  .surprise h2{margin:0 0 8px;font-size:22px;letter-spacing:.1em;color:var(--red);
+    text-shadow:0 0 12px rgba(255,42,58,.7)}
+  .surprise p{margin:0;font-size:17px;line-height:1.55}
+
+  .photo-wrap{position:relative;border-radius:4px;overflow:hidden;border:1px solid var(--line)}
+  .photo-wrap img{display:block;width:100%;max-height:420px;object-fit:cover;
+    filter:sepia(.25) contrast(1.05) saturate(.9)}
+  .photo-wrap::after{content:"";position:absolute;inset:0;pointer-events:none;
+    background:repeating-linear-gradient(to bottom, rgba(0,0,0,.08) 0 1px, transparent 1px 3px),
+      radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,.45));}
+  .vhs{position:absolute;left:10px;bottom:8px;z-index:2;font-family:var(--mono);font-size:20px;
+    color:#fff;text-shadow:0 0 4px #000,0 0 8px rgba(255,42,58,.6)}
+  .vhs.rec{top:8px;bottom:auto;color:var(--red)}
+  .caption{margin:10px 2px 0;font-style:italic;color:var(--muted);font-size:15px}
+
+  .tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+  .tab{font-family:var(--mono);font-size:19px;letter-spacing:0;white-space:nowrap;padding:10px 6px;border-radius:4px;
+    background:transparent;color:var(--muted);border:1px solid rgba(255,255,255,.12);cursor:pointer}
+  .tab[aria-selected="true"]{color:#fff;border-color:var(--red);background:rgba(255,42,58,.12);
+    box-shadow:0 0 14px rgba(255,42,58,.3)}
+  .msg{font-size:19px;line-height:1.6;min-height:3.2em;margin:0}
+  .msg .cursor{display:inline-block;width:.5em;background:var(--red);animation:blink 1s steps(1) infinite;margin-left:2px}
+  @keyframes blink{50%{opacity:0}}
+  .sig{text-align:right;margin:12px 0 0;font-style:italic;color:var(--muted)}
+  .reveal{margin-top:14px;font-family:var(--mono);font-size:20px;background:transparent;color:var(--red);
+    border:1px dashed var(--red);padding:8px 14px;border-radius:4px;cursor:pointer}
+  .answer{font-size:19px;line-height:1.55;margin:14px 0 0;color:#fff;
+    text-shadow:0 0 10px rgba(255,42,58,.35)}
+
+  .besoins{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .besoin{font-family:var(--serif);font-size:15px;text-align:left;padding:14px 12px;border-radius:5px;cursor:pointer;
+    background:rgba(255,255,255,.03);color:var(--ink);border:1px solid rgba(255,255,255,.1);
+    display:flex;gap:8px;align-items:center;transition:border-color .2s, box-shadow .2s}
+  .besoin:active,.besoin:hover{border-color:var(--red);box-shadow:0 0 12px rgba(255,42,58,.25)}
+  .besoin .e{font-size:20px}
+  .besoin.wide{grid-column:1 / -1;justify-content:center}
+
+  footer{text-align:center;font-family:var(--mono);color:var(--muted);font-size:18px;margin-top:26px;letter-spacing:.1em}
+  .colisBtn{display:inline-block;margin-top:14px;font-size:17px;letter-spacing:.04em;color:var(--muted);
+    border:1px solid rgba(255,255,255,.12);padding:6px 12px;border-radius:4px;cursor:pointer}
+
+  /* Feuilles (modales) */
+  .sheet{position:fixed;inset:0;z-index:60;display:none;align-items:flex-end;justify-content:center;
+    background:rgba(0,0,0,.6);backdrop-filter:blur(2px)}
+  .sheet.open{display:flex}
+  .sheet .box{width:100%;max-width:520px;max-height:88vh;overflow:auto;background:#120607;border-top:1px solid var(--red);
+    border-radius:12px 12px 0 0;padding:22px 20px calc(env(safe-area-inset-bottom) + 22px);
+    box-shadow:0 -10px 40px rgba(255,42,58,.2);animation:up .25s ease-out}
+  @keyframes up{from{transform:translateY(30px);opacity:0}to{transform:none;opacity:1}}
+  .close{float:right;background:none;border:none;color:var(--muted);font-size:26px;cursor:pointer;line-height:1}
+  .btn{font-family:var(--mono);font-size:20px;padding:10px 16px;border-radius:4px;cursor:pointer;
+    background:rgba(255,42,58,.15);color:#fff;border:1px solid var(--red)}
+  .btn.ghost{background:transparent;color:var(--muted);border-color:rgba(255,255,255,.2)}
+  input[type=password],input[type=text]{width:100%;font-size:18px;padding:10px 12px;border-radius:4px;
+    background:#000;color:#fff;border:1px solid var(--line);font-family:var(--mono)}
+  .plist{display:grid;gap:10px;margin-top:14px}
+  .pitem{display:grid;grid-template-columns:64px 1fr auto;gap:10px;align-items:center}
+  .pitem img{width:64px;height:64px;object-fit:cover;border-radius:4px;border:1px solid var(--line)}
+  .small{font-size:14px;color:var(--muted);line-height:1.5}
+  .err{color:var(--red);font-family:var(--mono);font-size:18px;min-height:1.2em}
+
+  .confetti{position:fixed;top:-20px;width:8px;height:14px;z-index:70;pointer-events:none;animation:fall linear forwards}
+  @keyframes fall{to{transform:translateY(110vh) rotate(720deg);opacity:.2}}
+
+  @media (prefers-reduced-motion: reduce){
+    .logo{animation:none}.msg .cursor{animation:none}.sheet .box{animation:none}
+  }
+</style>
+</head>
+<body>
+<canvas id="dust" aria-hidden="true"></canvas>
+<div class="scan" aria-hidden="true"></div>
+<div class="vignette" aria-hidden="true"></div>
+
+<main>
+  <header>
+    <svg class="logo" id="logo" viewBox="0 0 512 512" role="img" aria-label="E">
+      <defs>
+        <filter id="g" x="-30%" y="-30%" width="160%" height="160%">
+          <feGaussianBlur stdDeviation="9" result="b"/>
+          <feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+      <path filter="url(#g)" fill="rgba(180,10,20,0.18)" stroke="#ff2a3a" stroke-width="12"
+        d="M120 110 L370 110 L370 200 L345 200 L330 170 L230 170 L230 228 L300 228 L310 208 L325 208 L325 302 L310 302 L300 282 L230 282 L230 340 L335 340 L350 310 L375 310 L375 400 L120 400 L120 375 L150 375 L150 135 L120 135 Z"/>
+    </svg>
+    <h1 id="hello">Eléa</h1>
+    <div class="date" id="today"></div>
+    <div class="countdown" id="countdown" hidden></div>
+  </header>
+
+  <section class="card surprise" id="surprise" hidden>
+    <h2 id="sTitle"></h2>
+    <p id="sText"></p>
+  </section>
+
+  <section class="card" id="photoCard" hidden>
+    <p class="label">Archive du jour</p>
+    <div class="photo-wrap">
+      <span class="vhs rec">● REC</span>
+      <img id="photo" alt="Photo souvenir">
+      <span class="vhs" id="photoStamp"></span>
+    </div>
+    <p class="caption" id="photoCaption"></p>
+  </section>
+
+  <section class="card">
+    <div class="tabs" role="tablist">
+      <button class="tab" role="tab" id="tabMot" aria-selected="true">Mot du jour</button>
+      <button class="tab" role="tab" id="tabBlague" aria-selected="false">Blague du jour</button>
+    </div>
+    <div id="panel">
+      <p class="msg" id="msg"></p>
+      <p class="sig" id="sig"></p>
+    </div>
+  </section>
+
+  <section class="card">
+    <p class="label">J'ai besoin de…</p>
+    <div class="besoins" id="besoins"></div>
+  </section>
+
+  <footer>
+    <div id="foot"></div>
+    <label class="colisBtn">📦 Ouvrir un colis de papa
+      <input type="file" id="colisFile" accept=".txt,text/plain" hidden>
+    </label>
+  </footer>
+</main>
+
+<!-- Colis reçu -->
+<div class="sheet" id="colisSheet" aria-modal="true" role="dialog">
+  <div class="box">
+    <button class="close" data-close aria-label="Fermer">×</button>
+    <p class="label">📦 Colis de papa</p>
+    <div id="codeStep" hidden>
+      <p class="small">Ce colis est protégé. Entre le <b>code de famille</b> (demande-le à papa) :</p>
+      <input type="password" id="codeIn" autocomplete="off">
+      <p class="err" id="codeErr"></p>
+      <button class="btn" id="codeOk">Ouvrir</button>
+    </div>
+    <div id="colisDone" hidden>
+      <p class="msg" id="colisMsg"></p>
+      <div class="photo-wrap" id="colisPreviewWrap" hidden><img id="colisPreview" alt=""></div>
+      <div style="margin-top:16px"><button class="btn" data-close>Génial</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- Message "besoin" -->
+<div class="sheet" id="besoinSheet" aria-modal="true" role="dialog">
+  <div class="box">
+    <button class="close" data-close aria-label="Fermer">×</button>
+    <p class="label" id="bLabel"></p>
+    <p class="msg" id="bMsg"></p>
+    <p class="sig" id="bSig"></p>
+    <div style="display:flex;gap:10px;margin-top:16px">
+      <button class="btn" id="bAgain">Un autre</button>
+      <button class="btn ghost" data-close>Merci</button>
+    </div>
+  </div>
+</div>
+
+<!-- Mode papa -->
+<div class="sheet" id="papaSheet" aria-modal="true" role="dialog">
+  <div class="box">
+    <button class="close" data-close aria-label="Fermer">×</button>
+    <p class="label">Mode papa</p>
+    <div id="pinStep">
+      <p class="small">Code secret :</p>
+      <input type="password" id="pin" inputmode="numeric" autocomplete="off">
+      <p class="err" id="pinErr"></p>
+      <button class="btn" id="pinOk">Entrer</button>
+    </div>
+    <div id="papaStep" hidden>
+      <p class="label" style="margin-top:6px">1. Code de famille</p>
+      <p class="small">Le même sur ton téléphone et le sien. Il chiffre les colis : sans lui, un colis est illisible. Ne le mets jamais dans messages.js.</p>
+      <div style="display:flex;gap:8px"><input type="password" id="famCode" autocomplete="off" placeholder="Code de famille"><button class="btn" id="famSave">OK</button></div>
+      <p class="err" id="famErr"></p>
+
+      <p class="label" style="margin-top:18px">2. Envoyer un colis à Eléa</p>
+      <p class="small">Choisis des photos, ajoute une légende, puis « Envoyer » → WhatsApp → Eléa. Elle reçoit un seul fichier chiffré, qui n'apparaît pas dans sa galerie.</p>
+      <label class="btn" style="display:inline-block">+ Choisir des photos
+        <input type="file" id="sendFiles" accept="image/*" multiple hidden>
+      </label>
+      <div class="plist" id="sendList"></div>
+      <button class="btn" id="sendBtn" style="margin-top:12px" hidden>📦 Envoyer le colis</button>
+      <p class="err" id="sendErr"></p>
+
+      <p class="label" style="margin-top:18px">3. Photos sur ce téléphone</p>
+      <label class="btn ghost" style="display:inline-block">+ Ajouter directement ici
+        <input type="file" id="files" accept="image/*" multiple hidden>
+      </label>
+      <p class="err" id="papaErr"></p>
+      <div class="plist" id="plist"></div>
+    </div>
+  </div>
+</div>
+
+<script src="messages.js"></script>
+<script>
+(() => {
+  // ---------- Utilitaires date ----------
+  const now = new Date();
+  const Y = now.getFullYear(), M = now.getMonth(), D = now.getDate();
+  const DAY = Math.floor(Date.UTC(Y, M, D) / 864e5) - Math.floor(Date.UTC(2026, 0, 1) / 864e5);
+  const pad = n => String(n).padStart(2, "0");
+  const MMDD = pad(M + 1) + "-" + pad(D);
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // Tirage du jour : ordre mélangé, tout est vu avant répétition, nouveau mélange à chaque cycle
+  function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+  function dailyIndex(len, salt){
+    if (!len) return -1;
+    const d = ((DAY % (len * 1000)) + len * 1000) % (len * 1000);
+    const cycle = Math.floor(d / len), pos = d % len;
+    const order = [...Array(len).keys()], rnd = mulberry32(salt * 7919 + cycle);
+    for (let i = len - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [order[i], order[j]] = [order[j], order[i]]; }
+    return order[pos];
+  }
+
+  // ---------- En-tête ----------
+  const prenom = CONFIG.prenom;
+  document.getElementById("hello").textContent = prenom;
+  document.getElementById("today").textContent =
+    now.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" }).toUpperCase();
+  document.getElementById("foot").textContent = "— " + CONFIG.signature + " ❤ —";
+
+  const [bY, bM, bD] = CONFIG.naissance.split("-").map(Number);
+  let next = new Date(Y, bM - 1, bD);
+  if (next < new Date(Y, M, D)) next = new Date(Y + 1, bM - 1, bD);
+  const daysLeft = Math.round((next - new Date(Y, M, D)) / 864e5);
+  const ageNext = next.getFullYear() - bY;
+  if (daysLeft > 0 && daysLeft <= 60) {
+    const c = document.getElementById("countdown");
+    c.textContent = "J-" + daysLeft + " avant tes " + ageNext + " ans";
+    c.hidden = false;
+  }
+
+  // ---------- Surprise ----------
+  const s = SURPRISES[MMDD];
+  if (s) {
+    document.getElementById("sTitle").textContent = s.titre;
+    document.getElementById("sText").textContent = s.texte;
+    document.getElementById("surprise").hidden = false;
+    if (s.fete) setTimeout(confetti, 400);
+  }
+  function confetti(){
+    if (reduce) return;
+    const cols = ["#ff2a3a", "#ffffff", "#ffb3b9", "#b3121f"];
+    for (let i = 0; i < 90; i++) {
+      const c = document.createElement("div");
+      c.className = "confetti";
+      c.style.left = Math.random() * 100 + "vw";
+      c.style.background = cols[i % cols.length];
+      c.style.animationDuration = (2.5 + Math.random() * 2.5) + "s";
+      c.style.animationDelay = (Math.random() * 1.2) + "s";
+      document.body.appendChild(c);
+      setTimeout(() => c.remove(), 6500);
+    }
+  }
+
+  // ---------- Effet machine à écrire ----------
+  let typingTimer = null;
+  function type(el, text, done){
+    clearInterval(typingTimer);
+    if (reduce) { el.textContent = text; done && done(); return; }
+    el.textContent = "";
+    const span = document.createTextNode(""), cur = document.createElement("span");
+    cur.className = "cursor"; cur.innerHTML = "&nbsp;";
+    el.append(span, cur);
+    let i = 0;
+    typingTimer = setInterval(() => {
+      span.data = text.slice(0, ++i);
+      if (i >= text.length) { clearInterval(typingTimer); setTimeout(() => cur.remove(), 900); done && done(); }
+    }, 24);
+  }
+
+  // ---------- Mot / Blague du jour ----------
+  const msg = document.getElementById("msg"), sig = document.getElementById("sig"), panel = document.getElementById("panel");
+  const tabMot = document.getElementById("tabMot"), tabBlague = document.getElementById("tabBlague");
+  function showMot(){
+    tabMot.setAttribute("aria-selected", "true"); tabBlague.setAttribute("aria-selected", "false");
+    panel.querySelectorAll(".reveal,.answer").forEach(n => n.remove());
+    sig.textContent = "";
+    type(msg, MOTS[dailyIndex(MOTS.length, 11)], () => sig.textContent = "— " + CONFIG.signature);
+  }
+  function showBlague(){
+    tabMot.setAttribute("aria-selected", "false"); tabBlague.setAttribute("aria-selected", "true");
+    panel.querySelectorAll(".reveal,.answer").forEach(n => n.remove());
+    sig.textContent = "";
+    const b = BLAGUES[dailyIndex(BLAGUES.length, 23)];
+    type(msg, b.q, () => {
+      const btn = document.createElement("button");
+      btn.className = "reveal"; btn.textContent = "▶ La réponse";
+      btn.onclick = () => {
+        btn.remove();
+        const a = document.createElement("p"); a.className = "answer"; a.textContent = b.r;
+        panel.insertBefore(a, sig);
+      };
+      panel.insertBefore(btn, sig);
+    });
+  }
+  tabMot.onclick = showMot; tabBlague.onclick = showBlague;
+  showMot();
+
+  // ---------- J'ai besoin de... ----------
+  const grid = document.getElementById("besoins");
+  const keys = Object.keys(BESOINS);
+  keys.forEach((k, i) => {
+    const b = BESOINS[k], el = document.createElement("button");
+    el.className = "besoin" + (i === keys.length - 1 && keys.length % 2 ? " wide" : "");
+    el.innerHTML = '<span class="e"></span><span class="t"></span>';
+    el.querySelector(".e").textContent = b.emoji;
+    el.querySelector(".t").textContent = b.label;
+    el.onclick = () => openBesoin(k);
+    grid.appendChild(el);
+  });
+  const bSheet = document.getElementById("besoinSheet");
+  let curKey = null, last = -1;
+  function pickBesoin(){
+    const list = BESOINS[curKey].messages;
+    let i; do { i = Math.floor(Math.random() * list.length); } while (list.length > 1 && i === last);
+    last = i;
+    document.getElementById("bSig").textContent = "";
+    type(document.getElementById("bMsg"), list[i], () => document.getElementById("bSig").textContent = "— " + CONFIG.signature);
+  }
+  function openBesoin(k){
+    curKey = k; last = -1;
+    document.getElementById("bLabel").textContent = BESOINS[k].emoji + "  " + BESOINS[k].label;
+    bSheet.classList.add("open"); pickBesoin();
+  }
+  document.getElementById("bAgain").onclick = pickBesoin;
+  document.querySelectorAll(".sheet").forEach(sh => {
+    sh.addEventListener("click", e => { if (e.target === sh || e.target.hasAttribute("data-close")) sh.classList.remove("open"); });
+  });
+
+  // ---------- Photos (stockées sur le téléphone, IndexedDB) ----------
+  const DB = "evo", ST = "photos";
+  function db(){
+    return new Promise((res, rej) => {
+      try {
+        const r = indexedDB.open(DB, 1);
+        r.onupgradeneeded = () => r.result.createObjectStore(ST, { keyPath: "id", autoIncrement: true });
+        r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
+      } catch (e) { rej(e); }
+    });
+  }
+  async function tx(mode, fn){
+    const d = await db();
+    return new Promise((res, rej) => {
+      const t = d.transaction(ST, mode), st = t.objectStore(ST), out = fn(st);
+      t.oncomplete = () => res(out && out.result !== undefined ? out.result : undefined);
+      t.onerror = () => rej(t.error);
+    });
+  }
+  const allPhotos = () => tx("readonly", st => st.getAll()).then(r => r || []);
+  const urls = [];
+  const toUrl = blob => { const u = URL.createObjectURL(blob); urls.push(u); return u; };
+
+  async function showPhoto(){
+    try {
+      const list = (await allPhotos()).sort((a, b) => a.id - b.id);
+      const card = document.getElementById("photoCard");
+      if (!list.length) { card.hidden = true; return; }
+      const p = list[dailyIndex(list.length, 37)];
+      document.getElementById("photo").src = toUrl(p.blob);
+      document.getElementById("photoCaption").textContent = p.caption || "";
+      document.getElementById("photoStamp").textContent = "▶ PLAY  " + pad(D) + "." + pad(M + 1) + "." + String(Y).slice(2);
+      card.hidden = false;
+    } catch (e) { /* stockage indisponible : on n'affiche simplement pas de photo */ }
+  }
+  showPhoto();
+
+  function compress(file){
+    return new Promise((res, rej) => {
+      const img = new Image(), u = URL.createObjectURL(file);
+      img.onload = () => {
+        const max = 1400, r = Math.min(1, max / Math.max(img.width, img.height));
+        const c = document.createElement("canvas");
+        c.width = Math.round(img.width * r); c.height = Math.round(img.height * r);
+        c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+        URL.revokeObjectURL(u);
+        c.toBlob(b => b ? res(b) : rej(new Error("conversion")), "image/jpeg", 0.85);
+      };
+      img.onerror = () => { URL.revokeObjectURL(u); rej(new Error("image illisible")); };
+      img.src = u;
+    });
+  }
+
+  // ---------- Mode papa : 5 tapes rapides sur le E ----------
+  const papa = document.getElementById("papaSheet");
+  let taps = [];
+  document.getElementById("logo").addEventListener("click", () => {
+    const t = Date.now(); taps = taps.filter(x => t - x < 2500); taps.push(t);
+    if (taps.length >= 5) {
+      taps = [];
+      document.getElementById("pinStep").hidden = false;
+      document.getElementById("papaStep").hidden = true;
+      document.getElementById("pin").value = ""; document.getElementById("pinErr").textContent = "";
+      papa.classList.add("open");
+      setTimeout(() => document.getElementById("pin").focus(), 100);
+    }
+  });
+  function tryPin(){
+    if (document.getElementById("pin").value === String(CONFIG.pinPapa)) {
+      document.getElementById("pinStep").hidden = true;
+      document.getElementById("papaStep").hidden = false;
+      renderList();
+    } else document.getElementById("pinErr").textContent = "Code incorrect.";
+  }
+  document.getElementById("pinOk").onclick = tryPin;
+  document.getElementById("pin").addEventListener("keydown", e => { if (e.key === "Enter") tryPin(); });
+
+  async function renderList(){
+    const box = document.getElementById("plist"), err = document.getElementById("papaErr");
+    box.innerHTML = "";
+    try {
+      const list = (await allPhotos()).sort((a, b) => a.id - b.id);
+      err.textContent = list.length ? list.length + " photo(s)" : "Aucune photo pour l'instant.";
+      for (const p of list) {
+        const row = document.createElement("div"); row.className = "pitem";
+        const im = document.createElement("img"); im.src = toUrl(p.blob); im.alt = "";
+        const cap = document.createElement("input"); cap.type = "text"; cap.placeholder = "Légende (ex. : Toi à 3 ans, à la plage)"; cap.value = p.caption || "";
+        cap.onchange = () => tx("readwrite", st => st.put({ ...p, caption: cap.value.slice(0, 120) })).then(showPhoto);
+        const del = document.createElement("button"); del.className = "btn ghost"; del.textContent = "✕"; del.setAttribute("aria-label", "Supprimer");
+        del.onclick = async () => { await tx("readwrite", st => st.delete(p.id)); renderList(); showPhoto(); };
+        row.append(im, cap, del); box.appendChild(row);
+      }
+    } catch (e) { err.textContent = "Stockage indisponible sur ce navigateur."; }
+  }
+  document.getElementById("files").addEventListener("change", async e => {
+    const err = document.getElementById("papaErr"), files = [...e.target.files];
+    let ok = 0;
+    for (const f of files) {
+      try {
+        err.textContent = "Import " + (ok + 1) + "/" + files.length + "…";
+        const blob = await compress(f);
+        await tx("readwrite", st => st.add({ blob, caption: "", added: Date.now() }));
+        ok++;
+      } catch (x) { /* fichier ignoré */ }
+    }
+    e.target.value = "";
+    await renderList(); showPhoto();
+  });
+
+  // ---------- Colis chiffrés (papa → Eléa, via WhatsApp) ----------
+  const KEYNAME = "evo-famille";
+  const getFam = () => { try { return localStorage.getItem(KEYNAME) || ""; } catch (e) { return ""; } };
+  const setFam = v => { try { localStorage.setItem(KEYNAME, v); return true; } catch (e) { return false; } };
+  try { navigator.storage && navigator.storage.persist && navigator.storage.persist(); } catch (e) {}
+
+  const b64 = u8 => { let s = ""; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s); };
+  const unb64 = s => { const bin = atob(s); const u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return u; };
+  async function deriveKey(code, salt){
+    const base = await crypto.subtle.importKey("raw", new TextEncoder().encode(code), "PBKDF2", false, ["deriveKey"]);
+    return crypto.subtle.deriveKey({ name: "PBKDF2", salt, iterations: 150000, hash: "SHA-256" }, base,
+      { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]);
+  }
+  async function seal(obj, code){
+    const salt = crypto.getRandomValues(new Uint8Array(16)), iv = crypto.getRandomValues(new Uint8Array(12));
+    const key = await deriveKey(code, salt);
+    const ct = new Uint8Array(await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, new TextEncoder().encode(JSON.stringify(obj))));
+    return "EVO1." + b64(salt) + "." + b64(iv) + "." + b64(ct);
+  }
+  async function unseal(text, code){
+    const parts = text.trim().split(".");
+    if (parts[0] !== "EVO1" || parts.length !== 4) throw new Error("format");
+    const key = await deriveKey(code, unb64(parts[1]));
+    const pt = await crypto.subtle.decrypt({ name: "AES-GCM", iv: unb64(parts[2]) }, key, unb64(parts[3]));
+    return JSON.parse(new TextDecoder().decode(pt));
+  }
+  const blobToB64 = blob => blob.arrayBuffer().then(b => b64(new Uint8Array(b)));
+
+  // Envoi (téléphone de papa)
+  document.getElementById("famSave").onclick = () => {
+    const v = document.getElementById("famCode").value.trim(), err = document.getElementById("famErr");
+    if (v.length < 6) { err.textContent = "6 caractères minimum."; return; }
+    err.textContent = setFam(v) ? "Code enregistré sur ce téléphone ✓" : "Impossible d'enregistrer.";
+    document.getElementById("famCode").value = "";
+  };
+  let outgoing = [];
+  function renderSend(){
+    const box = document.getElementById("sendList"); box.innerHTML = "";
+    outgoing.forEach((o, i) => {
+      const row = document.createElement("div"); row.className = "pitem";
+      const im = document.createElement("img"); im.src = o.url; im.alt = "";
+      const cap = document.createElement("input"); cap.type = "text"; cap.placeholder = "Légende (ex. : Toi à 3 ans)"; cap.value = o.caption;
+      cap.oninput = () => o.caption = cap.value.slice(0, 120);
+      const del = document.createElement("button"); del.className = "btn ghost"; del.textContent = "✕";
+      del.onclick = () => { outgoing.splice(i, 1); renderSend(); };
+      row.append(im, cap, del); box.appendChild(row);
+    });
+    document.getElementById("sendBtn").hidden = !outgoing.length;
+  }
+  document.getElementById("sendFiles").addEventListener("change", async e => {
+    const err = document.getElementById("sendErr"), files = [...e.target.files].slice(0, 20 - outgoing.length);
+    for (const f of files) {
+      try { err.textContent = "Préparation…"; const blob = await compress(f); outgoing.push({ blob, url: toUrl(blob), caption: "" }); } catch (x) {}
+    }
+    err.textContent = outgoing.length >= 20 ? "20 photos max par colis." : "";
+    e.target.value = ""; renderSend();
+  });
+  document.getElementById("sendBtn").onclick = async () => {
+    const err = document.getElementById("sendErr"), code = getFam();
+    if (!code) { err.textContent = "Définis d'abord le code de famille (étape 1)."; return; }
+    try {
+      err.textContent = "Emballage et chiffrement…";
+      const photos = [];
+      for (const o of outgoing) photos.push({ caption: o.caption, data: await blobToB64(o.blob) });
+      const text = await seal({ v: 1, sent: Date.now(), photos }, code);
+      const d = new Date(), name = "colis-evo-" + d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate()) + "-" + pad(d.getHours()) + pad(d.getMinutes()) + ".txt";
+      const file = new File([text], name, { type: "text/plain" });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], title: "Colis Evo" });
+        err.textContent = "Colis envoyé ✓ (" + photos.length + " photo" + (photos.length > 1 ? "s" : "") + ")";
+        outgoing = []; renderSend();
+      } else {
+        const a = document.createElement("a"); a.href = URL.createObjectURL(file); a.download = name; a.click();
+        err.textContent = "Colis téléchargé : envoie-le à Eléa sur WhatsApp en « Document ».";
+      }
+    } catch (x) {
+      err.textContent = (x && x.name === "AbortError") ? "Envoi annulé." : "Échec de l'envoi.";
+    }
+  };
+
+  // Réception (téléphone d'Eléa)
+  const colisSheet = document.getElementById("colisSheet");
+  let pendingText = null;
+  async function openColis(text){
+    pendingText = text;
+    colisSheet.classList.add("open");
+    document.getElementById("colisDone").hidden = true;
+    const code = getFam();
+    if (code && await tryUnseal(code)) return;
+    document.getElementById("codeStep").hidden = false;
+    document.getElementById("codeIn").value = ""; document.getElementById("codeErr").textContent = "";
+  }
+  async function tryUnseal(code){
+    let data;
+    try { data = await unseal(pendingText, code); } catch (e) { return false; }
+    setFam(code);
+    document.getElementById("codeStep").hidden = true;
+    const existing = await allPhotos().catch(() => []);
+    const seen = new Set(existing.map(p => p.sig));
+    let added = 0, firstUrl = null;
+    for (const p of data.photos || []) {
+      const sig = String(data.sent) + ":" + p.data.length + ":" + p.data.slice(0, 40);
+      if (seen.has(sig)) continue;
+      const blob = new Blob([unb64(p.data)], { type: "image/jpeg" });
+      await tx("readwrite", st => st.add({ blob, caption: p.caption || "", added: Date.now(), sig }));
+      if (!firstUrl) firstUrl = toUrl(blob);
+      added++;
+    }
+    document.getElementById("colisMsg").textContent = added
+      ? added + " nouvelle" + (added > 1 ? "s" : "") + " photo" + (added > 1 ? "s" : "") + " ajoutée" + (added > 1 ? "s" : "") + " à tes archives. — Papa"
+      : "Ce colis avait déjà été ouvert.";
+    const w = document.getElementById("colisPreviewWrap");
+    if (firstUrl) { document.getElementById("colisPreview").src = firstUrl; w.hidden = false; } else w.hidden = true;
+    document.getElementById("colisDone").hidden = false;
+    if (added) confetti();
+    showPhoto();
+    pendingText = null;
+    return true;
+  }
+  document.getElementById("codeOk").onclick = async () => {
+    const ok = await tryUnseal(document.getElementById("codeIn").value.trim());
+    if (!ok) document.getElementById("codeErr").textContent = "Code incorrect.";
+  };
+  document.getElementById("colisFile").addEventListener("change", async e => {
+    const f = e.target.files[0]; e.target.value = "";
+    if (f) openColis(await f.text());
+  });
+  // Colis partagé depuis WhatsApp vers Evo (Android : Partager → Evo)
+  (async () => {
+    if (!location.search.includes("colis=1")) return;
+    history.replaceState(null, "", location.pathname);
+    try {
+      const c = await caches.open("evo-inbox"), reqs = await c.keys();
+      for (const r of reqs) { const res = await c.match(r); const t = await res.text(); await c.delete(r); await openColis(t); break; }
+    } catch (e) {}
+  })();
+
+  // ---------- Poussière lumineuse ----------
+  if (!reduce) {
+    const cv = document.getElementById("dust"), cx = cv.getContext("2d");
+    let W, H, P = [];
+    const size = () => { W = cv.width = innerWidth * devicePixelRatio; H = cv.height = innerHeight * devicePixelRatio; };
+    size(); addEventListener("resize", size);
+    for (let i = 0; i < 38; i++) P.push({ x: Math.random(), y: Math.random(), r: Math.random() * 1.6 + .4, v: Math.random() * .00025 + .00008, a: Math.random() * .5 + .15, w: Math.random() * 6.28 });
+    (function loop(t){
+      cx.clearRect(0, 0, W, H);
+      for (const p of P) {
+        p.y -= p.v; p.w += .01; if (p.y < -.02) { p.y = 1.02; p.x = Math.random(); }
+        const x = (p.x + Math.sin(p.w) * .01) * W, y = p.y * H;
+        cx.beginPath(); cx.arc(x, y, p.r * devicePixelRatio, 0, 6.283);
+        cx.fillStyle = "rgba(255,110,120," + p.a + ")"; cx.fill();
+      }
+      requestAnimationFrame(loop);
+    })();
+  }
+
+  // ---------- Hors ligne ----------
+  if ("serviceWorker" in navigator) { try { navigator.serviceWorker.register("sw.js"); } catch (e) {} }
+})();
+</script>
+</body>
+</html>
